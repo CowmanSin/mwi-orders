@@ -46,12 +46,15 @@ const changeLog: changeLogT = [
     date: "25-8-2023",
     info: "Now takes into account items you already have! No longer do you have to duplicate tabs and get out the calculator to work out how much you actually need to do (well, at least I don't have to anymore). Currently whenever you switch item it resets the items you own, but I'll be working on that (probably) in the future.\nIt's worth noting I'm disabled some of the teas that have no effect. I plan to re-enable them as I add functionality for them. Sorry about that :/\nFeel free to contact me (in game or on discord) with any suggestions you may have, I might want to add that feature too! (DMs OK)",
   },
+  {
+    release: "1.2.3",
+    date: "29-8-2023",
+    info: "Inventory is now retained through refreshes like the other data. You can see the total time to make, and the approximate time to make each item individually. Levels now restrict what you are able to craft (due to efficiency now taking into account levels... whoops, thought I'd fixed that). Combat actions are now avaliable, ie it will tell you how many times you need to kill Gary to get a Snail Shell. Planets haven't been added, and won't be, because the calculations to work out how mobs spawn and then work out drop rates on top of that hurts my head. (Please note the times for combat actions are based off of the sim and fighting each zone with the same equipment - https://mwisim.github.io/).",
+  },
 ];
 // Granttank
 export default changeLog;
 
-// total time to make
-// combat actions and drops
 // exp
 // enhancing
 

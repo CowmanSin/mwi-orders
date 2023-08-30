@@ -99,14 +99,16 @@ function CalcOutput({
               }
             >
               <option value="pick">Please pick an option</option>
-              {itemData[itemName].get.map((action, i) => (
-                <option
-                  key={`${i}-${action}`}
-                  value={action}
-                >
-                  {action}
-                </option>
-              ))}
+              {itemData[itemName]
+                .get(userInfoRef.current, actionData)
+                .map((action, i) => (
+                  <option
+                    key={`${i}-${action}`}
+                    value={action}
+                  >
+                    {action}
+                  </option>
+                ))}
             </select>
           </p>
           <IngredientsButton
@@ -141,6 +143,30 @@ function CalcOutput({
           onClick={() => setShowIngredientsList(false)}
         >
           <CenterClose>{">Click To Close<"}</CenterClose>
+          <p>Time</p>
+          <IngredientListAction $index={0}>
+            {(function () {
+              const gatherAll = allIngredients.totalTime(userInfoRef.current);
+              const quantityItemNeeded =
+                userInfoRef.current.quantity - quantityNeededWOwned;
+              return (
+                <>
+                  <p>
+                    Total Time: {secondsToReadable(roundNumber(gatherAll))} (
+                    {commNumber(roundNumber(gatherAll))} seconds)
+                  </p>
+                  <p>
+                    Time per Item:{" "}
+                    {secondsToReadable(
+                      roundNumber(gatherAll / quantityItemNeeded)
+                    )}{" "}
+                    ({commNumber(roundNumber(gatherAll / quantityItemNeeded))}{" "}
+                    seconds)
+                  </p>
+                </>
+              );
+            })()}
+          </IngredientListAction>
           <p>List of Actions</p>
           {allIngredients.showList.map((x, i) => {
             if (x.count < 1) return "";
@@ -287,16 +313,18 @@ function renderAction(
                   }
                 >
                   <option value="Market">Buy From Market</option>
-                  {itemData[i].get.map((actionName, ind) => {
-                    return (
-                      <option
-                        key={`${i}-${ind}-${actionName}`}
-                        value={actionName}
-                      >
-                        {actionName}
-                      </option>
-                    );
-                  })}
+                  {itemData[i]
+                    .get(userInfo, actionData)
+                    .map((actionName, ind) => {
+                      return (
+                        <option
+                          key={`${i}-${ind}-${actionName}`}
+                          value={actionName}
+                        >
+                          {actionName}
+                        </option>
+                      );
+                    })}
                 </select>
               </p>
               {getFromActions[i] &&

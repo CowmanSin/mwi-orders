@@ -1475,37 +1475,41 @@ export class User {
     return 1 + tools;
   }
 
-  efficiency(skill: skillT): number {
-    if (skill === "Enhancing" || skill === "Combat") return 1;
+  efficiency(action: Action): number {
+    if (action.skill === "Enhancing" || action.skill === "Combat") return 1;
     const level =
-      (this.skills[skill].level +
-        this.skills[skill].tea[skill] * 3 +
-        this.skills[skill].tea[`super${skill}`] * 6) /
-      100;
-    const tea = this.skills[skill].tea.efficiency ? 0.1 : 0;
+      (this.skills[action.skill].level -
+      action.level +
+      this.skills[action.skill].tea[action.skill] * 3 +
+      this.skills[action.skill].tea[`super${action.skill}`] * 6 +
+      this.skills[action.skill].tea.artisan
+        ? -5
+        : 0) / 100;
+
+    const tea = this.skills[action.skill].tea.efficiency ? 0.1 : 0;
     const community = this.communityBuffs.production / 100;
     let item = 0;
     if (this.items.necklaceOfEfficiency >= 0) {
       item += necklaceOfEfficiency[this.items.necklaceOfEfficiency] / 100;
     }
     if (
-      (skill === "Cheesesmithing" ||
-        skill === "Tailoring" ||
-        skill === "Crafting") &&
+      (action.skill === "Cheesesmithing" ||
+        action.skill === "Tailoring" ||
+        action.skill === "Crafting") &&
       this.items.eyeWatch >= 0
     ) {
       item += eyeWatch[this.items.eyeWatch] / 100;
     }
     if (
-      (skill === "Brewing" || skill === "Cooking") &&
+      (action.skill === "Brewing" || action.skill === "Cooking") &&
       this.items.redChefsHat >= 0
     ) {
       item += redChefsHat[this.items.redChefsHat] / 100;
     }
     if (
-      (skill === "Milking" ||
-        skill === "Foraging" ||
-        skill === "Woodcutting") &&
+      (action.skill === "Milking" ||
+        action.skill === "Foraging" ||
+        action.skill === "Woodcutting") &&
       this.items.collectorsBoots >= 0
     ) {
       item += collectorsBoots[this.items.collectorsBoots] / 100;
@@ -1640,13 +1644,30 @@ export class Item {
       .reduce((a, e) => (a.includes(e) ? a : [...a, e]), []);
   }
 
-  get get(): Array<actionNamesT> {
-    if (this.canGetFrom.filter((x) => x !== "Combat").length > 0) {
-      return Object.entries(this.getFrom).reduce(
-        (acc, [a, s]) => (s === "Combat" ? acc : acc.concat(a)),
-        []
-      );
-    } else return [];
+  get(userInfo: User, actionData: Record<string, Action>): Array<actionNamesT> {
+    const planets: actionNamesT = [
+      "Smelly Planet",
+      "Swamp Planet",
+      "Aqua Planet",
+      "Jungle Planet",
+      "Gobo Planet",
+      "Planet Of The Eyes",
+      "Sorcerer's Tower",
+      "Bear With It",
+      "Golem Cave",
+      "Twilight Zone",
+      "Infernal Abyss",
+    ];
+    return Object.entries(this.getFrom).reduce((acc, [a, s]) => {
+      const filter = (action: Action) =>
+        action.level < userInfo.skills[action.skill].level;
+
+      const filterCombat = (action: Action) => !planets.includes(action.name);
+      const action = actionData[a];
+      return (s === "Combat" ? filterCombat(action) : filter(action))
+        ? acc.concat(a)
+        : acc;
+    }, [] as Array<actionNamesT>);
   }
 }
 
@@ -1754,14 +1775,14 @@ export class Action {
               0
             ) * chance,
       };
-    }, {} as { [key: string]: number });
+    }, {} as Record<string, number>);
     const gatherBuff = userInfo.gathering(this.skill);
     const gatherPerAction = Object.entries(baseGather).reduce(
       (a, [itemName, quantity]) => ({
         ...a,
         [itemName]: quantity * gatherBuff * userInfo.gourmet(this.skill),
       }),
-      {}
+      {} as Record<string, number>
     );
     Object.entries<{ quantity: string; chance: number }>(
       this.rareOutputs
@@ -1779,10 +1800,11 @@ export class Action {
   }
 
   howLong(userInfo: User, actions: number) {
-    return (
-      (actions * this.time * userInfo.speed(this.skill)) /
-      userInfo.efficiency(this.skill)
-    );
+    let eff = 1;
+    const userEff = userInfo.efficiency(this);
+    if (actions > 1) eff = 1 + (userEff - 1) / 2;
+    if (actions > userEff) eff = userEff;
+    return (actions * this.time) / (eff * userInfo.speed(this.skill));
   }
 }
 
@@ -1924,6 +1946,13 @@ export class IngredientList {
         item: i as itemNamesT,
         count: q,
       }))
+    );
+  }
+
+  totalTime(userInfo: User) {
+    return this.actions.reduce(
+      (sum, action) => sum + action.action.howLong(userInfo, action.count),
+      0
     );
   }
 }
