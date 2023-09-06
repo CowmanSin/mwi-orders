@@ -17,7 +17,6 @@ import changeLog from "../../changeLog";
 
 function App() {
   const userInfoRef = useRef<User>(new User());
-  const [cookieReminder, setCookieReminder] = useState<boolean>(false);
   useEffect(() => {
     const userCookie1 = document.cookie.match(/(?<=userInfo=).+(?=;)/);
     const userCookie2 = document.cookie.match(/(?<=userInfo=).+$/);
@@ -25,12 +24,6 @@ function App() {
     if (userCookie1) userCookie = JSON.parse(userCookie1[0]);
     else if (userCookie2) userCookie = JSON.parse(userCookie2[0]);
     else return;
-    if (typeof userCookie.items.ringOfGathering === "boolean") {
-      setCookieReminder(true);
-      Object.entries(userCookie.items).forEach(([item, value]) => {
-        userCookie.items[item as keyof User["items"]] = value ? 0 : -1;
-      });
-    }
     userInfoRef.current = new User(userCookie);
   }, []);
   const [itemData, setItemData] = useState<Record<string, Item>>({});
@@ -93,9 +86,6 @@ function App() {
   return (
     <>
       <h1>The MWI Production Cowculator!</h1>
-      <Caution $missing={cookieReminder}>
-        The website has been updated. Please save and reload the page.
-      </Caution>
       <Caution $missing={missing}>
         Some market data is missing. Refreshing will send another request to
         fetch the market data{" "}

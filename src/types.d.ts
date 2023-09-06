@@ -1479,12 +1479,11 @@ export class User {
     if (action.skill === "Enhancing" || action.skill === "Combat") return 1;
     const level =
       (this.skills[action.skill].level -
-      action.level +
-      this.skills[action.skill].tea[action.skill] * 3 +
-      this.skills[action.skill].tea[`super${action.skill}`] * 6 +
-      this.skills[action.skill].tea.artisan
-        ? -5
-        : 0) / 100;
+        action.level +
+        this.skills[action.skill].tea[action.skill] * 3 +
+        this.skills[action.skill].tea[`super${action.skill}`] * 6 +
+        (this.skills[action.skill].tea.artisan ? -5 : 0)) /
+      100;
 
     const tea = this.skills[action.skill].tea.efficiency ? 0.1 : 0;
     const community = this.communityBuffs.production / 100;

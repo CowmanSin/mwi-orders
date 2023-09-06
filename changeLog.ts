@@ -51,6 +51,11 @@ const changeLog: changeLogT = [
     date: "29-8-2023",
     info: "Inventory is now retained through refreshes like the other data. You can see the total time to make, and the approximate time to make each item individually. Levels now restrict what you are able to craft (due to efficiency now taking into account levels... whoops, thought I'd fixed that). Combat actions are now avaliable, ie it will tell you how many times you need to kill Gary to get a Snail Shell. Planets haven't been added, and won't be, because the calculations to work out how mobs spawn and then work out drop rates on top of that hurts my head. (Please note the times for combat actions are based off of the sim and fighting each zone with the same equipment - https://mwisim.github.io/).",
   },
+  {
+    release: "1.2.3-bug-squish",
+    date: "6-9-2023",
+    info: "Small change. Fixed an issue with efficiency calculations.",
+  },
 ];
 // Granttank
 export default changeLog;
